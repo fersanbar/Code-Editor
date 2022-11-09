@@ -1,0 +1,19 @@
+.abs-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-justify: auto;
+
+}
+
+.form {
+  width: 450px;
+  background-color: #000027;
+  color: white;
+}
+
+#container{
+  height: 100px;
+}
+

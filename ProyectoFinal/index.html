@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEER CODE</title>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="./index.css">
+</head>
+
+<body style="background-color:black ">
+    <div class="container">
+        <div class="abs-center">
+            <form action="#" class="border p-2 form">
+                <h3 class="text-center">BEER CODE - EDITOR DE CODIGO</h3>
+                <P></P>
+                </select>
+                <p></p>
+                <div class="d-flex justify-content-evenly">
+                    <input type="button" value="Abrir" onclick="onAbrir()" class="btn btn-secondary" />
+                    <input type="button" value="Guardar" onclick="onGuardar()" class="btn btn-secondary" />
+                    <input type="button" value="Ejecutar" id="ejecutarArchivo" class="btn btn-primary" />
+                </div>
+
+                <p>
+                <div class="d-flex flex-column bd-highlight mb-3">
+                    <textarea name="txtContenido" id="txtContenido" placeholder="Terminal"></textarea>
+                </div>
+                </p>
+                <div id="container" />
+            </form>
+        </div>
+    </div>
+    <script>
+
+        const { ipcRenderer } = require('electron');
+        const { node } = require('compile-run');
+        const notifier = require('node-notifier');
+        const path = require('path');
+
+        onAbrir = () => {
+            ipcRenderer.send('openFile');
+        }
+
+        ipcRenderer.on('datosarchivo', (event, args) => {
+            editor.getModel().setValue(args);
+        });
+
+
+    </script>
+    <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
+    <script>
+        var editor;
+        require.config({ paths: { vs: './node_modules/monaco-editor/min/vs' } });
+
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('container'), {
+                value: ['var saludo = "Hola Mundo"', '\tconsole.log(saludo)'].join('\n'),
+                language: 'javascript'
+            });
+        });
+
+        onGuardar = () => {
+            ipcRenderer.send('saveFile', editor.getModel().getValue());
+        }
+
+        document.getElementById('ejecutarArchivo').onclick = (event) => {
+            const sourcecode = editor.getModel().getValue();
+            let resultPromise = node.runSource(sourcecode);
+            resultPromise
+                .then(result => {
+                    document.getElementById("txtContenido").value = result.stdout
+                    console.log(result.stdout);
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+            console.log(__dirname);
+            notifier.notify(
+                {
+                    title: 'EJECUCION',
+                    message: 'Se ha ejecutado correctamente',
+                    sound: true,
+                    wait: true
+                })
+
+        }
+
+
+    </script>
+</body>
+
+</html>
